@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FindR</title>
+<style>
+:root{
+  --purple:#4b1fc4;--purple2:#6737df;--lav:#f4f0ff;--text:#171529;
+  --muted:#77738a;--border:#e8e4f0;--green:#16834a;--green-bg:#dff7e8;
+  --red:#cf3c55;--red-bg:#ffe4e9;--yellow:#9a7300;--yellow-bg:#fff2bf;
+  --shadow:0 10px 30px rgba(47,25,102,.08);
+}
+*{box-sizing:border-box}
+body{margin:0;font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;background:#eeeaf7;color:var(--text)}
+button,input,select,textarea{font:inherit}
+button{cursor:pointer}
+.app-shell{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:22px}
+.phone{
+  width:min(430px,100%);min-height:850px;max-height:94vh;background:#fbfaff;border:1px solid #ddd8ea;
+  border-radius:34px;overflow:hidden;box-shadow:0 24px 70px rgba(30,15,70,.18);position:relative
+}
+@media(min-width:900px){.phone{width:430px}.desktop-note{display:block}}
+@media(max-width:600px){body{background:#fbfaff}.app-shell{padding:0}.phone{border:0;border-radius:0;max-height:none;min-height:100vh;box-shadow:none}}
+.screen{height:100%;min-height:850px;display:flex;flex-direction:column}
+.hidden{display:none!important}
+.topbar{height:62px;display:flex;align-items:center;gap:12px;padding:12px 20px;border-bottom:1px solid var(--border);background:#fff}
+.topbar h2{font-size:15px;margin:0;flex:1;text-align:center}
+.icon-btn{border:0;background:transparent;font-size:21px;color:#252032;padding:5px}
+.content{padding:18px 18px 96px;overflow:auto;flex:1}
+.content::-webkit-scrollbar{width:0}
+.logo{width:78px;height:78px;border-radius:22px;background:linear-gradient(135deg,#7a4aff,#4619bd);display:grid;place-items:center;color:#fff;font-size:39px;box-shadow:0 14px 28px rgba(75,31,196,.25)}
+.findr-logo{
+  width:120px;
+  height:120px;
+  object-fit:contain;
+  margin-bottom:18px;
+}
+.splash{align-items:center;justify-content:center;background:linear-gradient(150deg,#f6f2ff,#fff)}
+.splash .logo{margin-bottom:18px}
+.splash h1{font-size:24px;line-height:1.1;text-align:center;color:#2d167d;margin:0 0 10px}
+.splash p{margin:0;text-align:center;color:#4c475b}
+.loader{width:20px;height:20px;border:2px solid #d6cdf3;border-top-color:var(--purple);border-radius:50%;animation:spin .9s linear infinite;margin-top:38px}
+@keyframes spin{to{transform:rotate(360deg)}}
+.auth{padding:34px 26px}
+.auth h1{font-size:24px;margin:0 0 6px}.sub{color:var(--muted);font-size:13px;margin-bottom:28px}
+.field{margin:0 0 12px}.field label{font-size:12px;font-weight:700;display:block;margin:0 0 6px}
+input,select,textarea{width:100%;border:1px solid #ded9e8;background:#fff;border-radius:9px;padding:12px 12px;outline:none;color:var(--text)}
+input:focus,select:focus,textarea:focus{border-color:#8c70df;box-shadow:0 0 0 3px #ede7ff}
+textarea{min-height:86px;resize:vertical}
+.primary,.secondary{width:100%;border-radius:10px;padding:12px 15px;font-weight:700;border:0}
+.primary{background:linear-gradient(135deg,var(--purple),#6330d6);color:#fff;box-shadow:0 8px 18px rgba(75,31,196,.2)}
+.secondary{background:#fff;color:var(--purple);border:1px solid #b7a7e8}
+.link{color:var(--purple);font-weight:700;border:0;background:none}
+.row{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.or{display:flex;align-items:center;gap:10px;color:#999;font-size:12px;margin:15px 0}.or:before,.or:after{content:"";height:1px;background:#ddd6e8;flex:1}
+.tiny{font-size:11px;color:var(--muted)}
+.header-greeting{font-size:21px;font-weight:800}.header-greeting span{font-size:16px}
+.search-row{display:flex;gap:8px;margin:15px 0}.search-wrap{position:relative;flex:1}.search-wrap span{position:absolute;left:12px;top:10px;color:#aaa}.search-wrap input{padding-left:34px}
+.filter-btn{width:44px;border:1px solid var(--border);background:#fff;border-radius:9px}
+.quick-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:10px 0 20px}
+.quick{border:1px solid var(--border);background:#fff;border-radius:12px;padding:17px 10px;text-align:center;box-shadow:var(--shadow);font-weight:800;font-size:13px}
+.quick .qicon{font-size:27px;margin-bottom:6px}.quick.lost .qicon{color:#e3294b}.quick.found .qicon{color:#14995a}
+.section-head{display:flex;align-items:center;justify-content:space-between;margin:18px 0 10px}.section-head h3{font-size:15px;margin:0}
+.items{display:flex;flex-direction:column;gap:8px}
+.item-card{display:flex;align-items:center;gap:11px;background:#fff;border:1px solid var(--border);border-radius:11px;padding:10px;box-shadow:0 5px 16px rgba(30,15,70,.04)}
+.thumb{width:46px;height:46px;border-radius:8px;background:#f0edf6;display:grid;place-items:center;overflow:hidden;flex:none;font-size:25px}
+.thumb img{width:100%;height:100%;object-fit:cover}
+.item-main{min-width:0;flex:1}.item-main b{display:block;font-size:13px}.item-main p{margin:3px 0 0;color:var(--muted);font-size:11px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.badge{font-size:9px;font-weight:800;padding:4px 7px;border-radius:20px;white-space:nowrap}.found{background:var(--green-bg);color:var(--green)}.lost{background:var(--red-bg);color:var(--red)}.pending{background:var(--yellow-bg);color:var(--yellow)}.accepted{background:#dff2ff;color:#1473a5}.rejected{background:#eee7f4;color:#716779}
+.bottomnav{position:absolute;bottom:0;left:0;right:0;height:70px;background:#fff;border-top:1px solid var(--border);display:flex;align-items:center;justify-content:space-around;z-index:10}
+.nav-btn{border:0;background:none;color:#6d6879;font-size:10px;display:flex;flex-direction:column;align-items:center;gap:4px}.nav-btn span:first-child{font-size:19px}.nav-btn.active{color:var(--purple)}
+.fab{width:44px;height:44px;border-radius:50%;background:var(--purple);color:#fff;border:4px solid #fff;box-shadow:0 5px 16px rgba(75,31,196,.3);font-size:23px;margin-top:-28px}
+.form-card{background:#fff;border:1px solid var(--border);border-radius:13px;padding:12px;margin-bottom:12px}
+.upload{height:86px;border:1px dashed #d2cce0;border-radius:9px;display:grid;place-items:center;color:#777;font-size:11px;margin-bottom:13px;background:#fbfaff}
+.upload .upload-icon{font-size:25px}
+.form-actions{margin-top:18px}
+.results-toolbar{margin-bottom:10px}
+.filter-panel{background:#fff;border:1px solid var(--border);border-radius:12px;padding:13px;margin-bottom:12px}
+.filter-panel .grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.detail-image{height:210px;border-radius:12px;background:#f0edf5;display:grid;place-items:center;font-size:86px;margin-bottom:12px;overflow:hidden}.detail-image img{width:100%;height:100%;object-fit:contain}
+.detail-card{background:#fff;border:1px solid var(--border);border-radius:12px;padding:14px}.detail-card h2{font-size:18px;margin:0 0 12px}.detail-line{margin:9px 0}.detail-line b{font-size:11px;display:block}.detail-line span{font-size:12px;color:#4e4a59}
+.profile-head{background:linear-gradient(135deg,#6840df,#8b65ed);color:#fff;margin:-18px -18px 15px;padding:25px 18px 20px}.avatar{width:58px;height:58px;border-radius:50%;background:#eee;color:#888;display:grid;place-items:center;font-size:31px;margin-bottom:10px}.profile-head h2{margin:0;font-size:18px}.profile-head p{margin:3px 0;font-size:11px;opacity:.9}
+.menu-list{
+  background:transparent;
+  border:0;
+  border-radius:0;
+  overflow:visible;
+}
+
+.menu{
+  width:100%;
+  box-sizing:border-box;
+  padding:18px 16px;
+  margin-bottom:10px;
+  border:1px solid var(--border);
+  border-radius:16px;
+  background:#fff;
+  display:flex;
+  align-items:center;
+  gap:14px;
+  font-size:15px;
+  color:var(--text);
+  text-align:left;
+  box-shadow:0 4px 14px rgba(30,15,70,.04);
+}
+
+.menu:last-child{
+  margin-bottom:0;
+}
+
+.menu .mi{
+  width:28px;
+  min-width:28px;
+  text-align:center;
+  font-size:19px;
+}
+
+.menu .arrow{
+  margin-left:auto;
+  color:#999;
+  font-size:20px;
+}
+.admin-stats{display:grid;grid-template-columns:repeat(4,1fr);gap:6px}.stat{background:#fff;border:1px solid var(--border);border-radius:9px;padding:9px 4px;text-align:center}.stat b{display:block;font-size:16px}.stat span{font-size:8px;color:var(--muted)}
+.notice{background:#fff;border:1px solid var(--border);border-radius:11px;padding:12px;display:flex;gap:10px;margin-bottom:8px}.notice-icon{width:30px;height:30px;border-radius:50%;background:#f0ecff;display:grid;place-items:center;flex:none}.notice p{margin:0;font-size:11px;line-height:1.45}.notice small{color:#888;font-size:9px}
+.empty{padding:40px 10px;text-align:center;color:#888}.empty div{font-size:45px;margin-bottom:8px}
+.toast{position:absolute;left:50%;bottom:84px;transform:translateX(-50%) translateY(20px);background:#17132a;color:#fff;padding:10px 15px;border-radius:10px;font-size:11px;opacity:0;pointer-events:none;transition:.25s;z-index:30;white-space:nowrap}.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+.modal{position:absolute;inset:0;background:rgba(24,15,50,.4);z-index:20;display:flex;align-items:flex-end}.modal-box{width:100%;background:#fff;border-radius:22px 22px 0 0;padding:20px}.modal-box h3{margin:0 0 15px}.modal-actions{display:grid;gap:9px}
+.desktop-note{display:none;position:fixed;top:14px;left:50%;transform:translateX(-50%);font-size:12px;color:#6d6879}
+</style>
+</head>
+<body>
+<div class="desktop-note">Responsive Campus Lost & Found prototype • data is stored locally in your browser</div>
+<div class="app-shell"><div class="phone" id="app"></div></div>
+
+<script>
+const initialItems=[
+ {id:1,name:"Black Wallet",type:"Found",category:"Accessories",location:"Near Library",date:"10 May 2025, 02:30 PM",description:"A black leather wallet found near the central library. Contains some cards and cash.",postedBy:"Rohit (BCA 2nd Year)",emoji:"👛",status:"Found"},
+ {id:2,name:"ID Card",type:"Lost",category:"Documents",location:"Block C",date:"8 May 2025",description:"Student ID card lost in Block C.",postedBy:"Suraj",emoji:"🪪",status:"Lost"},
+ {id:3,name:"Blue Water Bottle",type:"Found",category:"Personal",location:"Playground",date:"6 May 2025",description:"Blue water bottle found in playground.",postedBy:"Neha",emoji:"🧴",status:"Found"},
+ {id:4,name:"Maths Textbook",type:"Lost",category:"Books",location:"Seminar Hall",date:"5 May 2025",description:"Mathematics textbook lost in seminar hall.",postedBy:"Suraj",emoji:"📘",status:"Lost"},
+ {id:5,name:"Red Keychain",type:"Found",category:"Accessories",location:"Near Parking",date:"2 May 2025",description:"Red keychain found near parking.",postedBy:"Aman",emoji:"🔑",status:"Found"}
+];
+let items=JSON.parse(localStorage.getItem("clf_items")||"null")||initialItems;
+let claims=JSON.parse(localStorage.getItem("clf_claims")||"null")||[
+ {itemId:1,status:"Pending",reason:"This is my wallet; it contains my cards.",contact:"9876543210",date:"10 May 2025"},
+ {itemId:2,status:"Accepted",reason:"My student ID.",contact:"9876543210",date:"8 May 2025"},
+ {itemId:4,status:"Rejected",reason:"It belongs to me.",contact:"9876543210",date:"5 May 2025"}
+];
+let user=JSON.parse(localStorage.getItem("clf_user")||"null")||{name:"Suraj Bhonde",email:"suraj@example.com",phone:"+91 12345 67890",course:"BCA 2nd Year"};
+let current="splash", selectedItem=null;
+
+const app=document.getElementById("app");
+const save=()=>{localStorage.setItem("clf_items",JSON.stringify(items));localStorage.setItem("clf_claims",JSON.stringify(claims));localStorage.setItem("clf_user",JSON.stringify(user));};
+
+function esc(s){return String(s??"").replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[m]));}
+function imgOrEmoji(item,big=false){
+ return item.image ? `<img src="${esc(item.image)}" alt="${esc(item.name)}">` : `<span>${item.emoji||"📦"}</span>`;
+}
+function badge(status){return `<span class="badge ${status.toLowerCase()}">${esc(status.toUpperCase())}</span>`}
+
+function shell(content,nav=true,title="",back=null){
+ app.innerHTML=`<div class="screen">
+ ${title?`<div class="topbar"><button class="icon-btn" onclick="${back?`go('${back}')`:"go('home')"}">‹</button><h2>${esc(title)}</h2><button class="icon-btn" onclick="showToast('More options')">⋯</button></div>`:""}
+ <div class="content">${content}</div>
+ ${nav?bottomNav():""}<div id="toast" class="toast"></div></div>`;
+}
+function bottomNav(){
+ return `<div class="bottomnav">
+ <button class="nav-btn ${current==="home"?"active":""}" onclick="go('home')"><span>⌂</span>Home</button>
+ <button class="nav-btn ${current==="posts"?"active":""}" onclick="go('posts')"><span>⌲</span>My Posts</button>
+ <button class="nav-btn" onclick="openCreate()"><span class="fab">+</span></button>
+ <button class="nav-btn ${current==="claims"?"active":""}" onclick="go('claims')"><span>✓</span>Claims</button>
+ <button class="nav-btn ${current==="profile"?"active":""}" onclick="go('profile')"><span>ⓘ</span>Profile</button>
+ </div>`;
+}
+function showToast(msg){const t=document.getElementById("toast");if(!t)return;t.textContent=msg;t.classList.add("show");setTimeout(()=>t.classList.remove("show"),2200)}
+
+function render(){
+ if(current==="splash") return splash();
+ if(current==="login") return login();
+ if(current==="signup") return signup();
+ if(current==="home") return home();
+ if(current==="lost") return reportForm("Lost");
+ if(current==="found") return reportForm("Found");
+ if(current==="search") return search();
+ if(current==="results") return searchResults();
+ if(current==="detail") return detail();
+ if(current==="claim") return claimForm();
+ if(current==="claims") return claimsPage();
+ if(current==="posts") return postsPage();
+ if(current==="notifications") return notifications();
+ if(current==="profile") return profile();
+ if(current==="admin") return admin();
+}
+function splash(){
+ app.innerHTML=`<div class="screen splash"><img class="findr-logo" src="findr-logo.png" alt="FindR Logo"><h1>FindR</h1><p>Lost it? Found it?<br>Let's get it back.</p><div class="loader"></div></div>`;
+ setTimeout(()=>go("login"),900);
+}
+function login(){
+ app.innerHTML=`<div class="screen"><div class="content auth">
+ <h1>Welcome Back!</h1><div class="sub">Login to continue</div>
+ <div class="field"><label>Email / Student ID</label><input id="loginEmail" placeholder="you@example.com"></div>
+ <div class="field"><label>Password</label><input type="password" id="loginPass" placeholder="Password"></div>
+ <div style="text-align:right;margin:4px 0 18px"><button class="link tiny" onclick="showToast('Password reset link would be sent here')">Forgot Password?</button></div>
+ <button class="primary" onclick="doLogin()">Login</button><div class="or">or</div><button class="secondary" onclick="go('signup')">Sign Up</button>
+ <p class="tiny" style="text-align:center;margin-top:24px">By continuing, you agree to our <span style="color:var(--purple);font-weight:700">Terms &amp; Conditions</span></p>
+ </div></div>`;
+}
+function doLogin(){user.name=user.name||"Suraj Bhonde";save();go("home")}
+function signup(){
+ app.innerHTML=`<div class="screen"><div class="content auth">
+ <h1>Create Account</h1><div class="sub">Sign up to get started</div>
+ <div class="field"><label>Full Name</label><input id="suName" placeholder="Full Name"></div>
+ <div class="field"><label>Email / Student ID</label><input id="suEmail" type="email" placeholder="you@example.com"></div>
+ <div class="field"><label>Mobile Number</label><input id="suPhone" type="tel" maxlength="10" inputmode="numeric" placeholder="Mobile Number"></div>
+ <div class="field"><label>Password</label><input type="password" id="suPass" placeholder="Password"></div>
+ <button class="primary" onclick="doSignup()">Sign Up</button>
+ <p class="tiny" style="text-align:center;margin-top:25px">Already have an account? <button class="link" onclick="go('login')">Login</button></p>
+ </div></div>`;
+}
+function doSignup(){
+
+    const n = document.getElementById("suName").value.trim();
+    const email = document.getElementById("suEmail").value.trim();
+    const phone = document.getElementById("suPhone").value.trim();
+    const password = document.getElementById("suPass").value;
+
+    if(!n){
+        showToast("Please enter your full name");
+        return;
+    }
+
+    if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){
+        showToast("Please enter a valid email address");
+        return;
+    }
+
+    if(!/^\d{10}$/.test(phone)){
+        showToast("Mobile number must contain exactly 10 digits");
+        return;
+    }
+
+    if(!/^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{8,}$/.test(password)){
+        showToast("Password must be at least 8 characters with letters and numbers");
+        return;
+    }
+
+    user.name = n;
+    user.email = email;
+    user.phone = phone;
+
+    save();
+    showToast("Account created");
+    setTimeout(()=>go("home"),400);
+}
+
+function home(){
+ const recent=items.slice(0,3).map(itemCard).join("");
+ shell(`<div class="header-greeting">Hello, ${esc(user.name.split(" ")[0])} 👋</div><div class="tiny">What are you looking for today?</div>
+ <div class="search-row"><div class="search-wrap"><span>⌕</span><input placeholder="Search items..." onkeydown="if(event.key==='Enter')doSearch(this.value)"></div><button class="filter-btn" onclick="go('search')">☷</button></div>
+ <div class="quick-grid"><button class="quick lost" onclick="go('lost')"><div class="qicon">🔒</div>Report Lost Item</button><button class="quick found" onclick="go('found')"><div class="qicon">🔓</div>Report Found Item</button></div>
+ <div class="section-head"><h3>Recent Items</h3><button class="link tiny" onclick="go('results')">View All</button></div><div class="items">${recent}</div>`);
+}
+function itemCard(item){
+ return `<button class="item-card" style="text-align:left;width:100%" onclick="openItem(${item.id})"><div class="thumb">${imgOrEmoji(item)}</div><div class="item-main"><b>${esc(item.name)}</b><p>${esc(item.type==="Found"?"Found":"Lost")} ${esc(item.location)} • ${esc(item.date)}</p></div>${badge(item.status)}</button>`;
+}
+function reportForm(type){
+ const isLost=type==="Lost";
+ shell(`<div class="form-card"><div class="upload" onclick="pickImage('photo-${type}')"><div><div class="upload-icon">￼</div>Add Item Photo</div><input id="photo-${type}" type="file" accept="image/*" hidden onchange="previewPhoto(event,'preview-${type}')"></div><img id="preview-${type}" style="display:none;width:100%;height:130px;object-fit:contain;border-radius:9px;margin:-2px 0 12px"></div>
+ <div class="field"><label>Item Name</label><input id="fName" placeholder="e.g. Black Wallet"></div>
+ <div class="field"><label>Category</label><select id="fCategory"><option>Accessories</option><option>Documents</option><option>Books</option><option>Electronics</option><option>Personal</option><option>Other</option></select></div>
+ <div class="field"><label>Description</label><textarea id="fDesc" placeholder="Write details about the item..."></textarea></div>
+ <div class="field"><label>${isLost?"Lost":"Found"} Location</label><input id="fLocation" placeholder="e.g. Library, C Block"></div>
+ <div class="field"><label>${isLost?"Lost":"Found"} Date &amp; Time</label><input id="fDate" type="datetime-local"></div>
+ <div class="form-actions"><button class="primary" onclick="submitReport('${type}')">Submit</button></div>`,true,`Report ${type} Item`,"home");
+}
+function pickImage(id){document.getElementById(id).click()}
+function previewPhoto(e,id){const file=e.target.files[0];if(!file)return;const r=new FileReader();r.onload=()=>{const im=document.getElementById(id);im.src=r.result;im.style.display="block";im.dataset.value=r.result};r.readAsDataURL(file)}
+function submitReport(type){
+ const name=document.getElementById("fName").value.trim();if(!name){showToast("Please enter an item name");return}
+ const img=document.getElementById("preview-"+type)?.dataset.value||"";
+ const id=Date.now();items.unshift({id,name,type,category:document.getElementById("fCategory").value,location:document.getElementById("fLocation").value||"Campus",date:new Date(document.getElementById("fDate").value||Date.now()).toLocaleString("en-IN"),description:document.getElementById("fDesc").value||"No description provided.",postedBy:user.name,emoji:type==="Lost"?"📦":"🔎",status:type,image:img});save();showToast(`${type} item posted`);setTimeout(()=>go("posts"),450);
+}
+function search(){
+ shell(`<div class="search-row results-toolbar"><div class="search-wrap"><span>⌕</span><input id="searchInput" placeholder="Search items..." oninput="liveSearch(this.value)"></div><button class="filter-btn" onclick="document.getElementById('filterPanel').classList.toggle('hidden')">☷</button></div>
+ <div id="filterPanel" class="filter-panel hidden"><div class="tiny" style="font-weight:800;margin-bottom:9px">Filter Options</div><div class="grid">
+ <div class="field"><label>Category</label><select id="fltCat"><option>All</option><option>Accessories</option><option>Documents</option><option>Books</option><option>Electronics</option><option>Personal</option><option>Other</option></select></div>
+ <div class="field"><label>Type</label><select id="fltType"><option>All</option><option>Lost</option><option>Found</option></select></div>
+ <div class="field"><label>Location</label><input id="fltLoc" placeholder="e.g. Library"></div>
+ <div class="field"><label>Status</label><select id="fltStatus"><option>All</option><option>Lost</option><option>Found</option><option>Pending</option></select></div></div>
+ <div style="display:flex;gap:8px;margin-top:5px"><button class="secondary" onclick="clearFilters()">Reset</button><button class="primary" onclick="applyFilters()">Apply Filter</button></div></div>
+ <div id="searchList" class="items">${items.map(itemCard).join("")}</div>`,true,"Search & Filter","home");
+}
+function liveSearch(q){const list=items.filter(i=>(i.name+" "+i.description+" "+i.location).toLowerCase().includes(q.toLowerCase()));document.getElementById("searchList").innerHTML=list.length?list.map(itemCard).join(""):`<div class="empty"><div>⌕</div>No items found</div>`}
+function applyFilters(){
+ const cat=document.getElementById("fltCat").value,type=document.getElementById("fltType").value,loc=document.getElementById("fltLoc").value.toLowerCase(),st=document.getElementById("fltStatus").value;
+ const list=items.filter(i=>(cat==="All"||i.category===cat)&&(type==="All"||i.type===type)&&(!loc||i.location.toLowerCase().includes(loc))&&(st==="All"||i.status===st));
+ document.getElementById("searchList").innerHTML=list.length?list.map(itemCard).join(""):`<div class="empty"><div>⌕</div>No matching items</div>`;
+}
+function clearFilters(){go("search")}
+function searchResults(){go("search")}
+function doSearch(q){go("search");setTimeout(()=>{document.getElementById("searchInput").value=q;liveSearch(q)},30)}
+function openItem(id){selectedItem=items.find(x=>x.id===id);go("detail")}
+function detail(){
+ const i=selectedItem;if(!i)return go("home");
+ shell(`<div class="detail-image">${imgOrEmoji(i,true)}</div><div class="detail-card"><div>${badge(i.status)}</div><h2>${esc(i.name)}</h2>
+ <div class="detail-line"><b>${i.type==="Found"?"Found":"Lost"} Location</b><span>${esc(i.location)}</span></div>
+ <div class="detail-line"><b>${i.type==="Found"?"Found":"Lost"} Date &amp; Time</b><span>${esc(i.date)}</span></div>
+ <div class="detail-line"><b>Description</b><span>${esc(i.description)}</span></div>
+ <div class="detail-line"><b>Posted By</b><span>${esc(i.postedBy)}</span></div>
+ </div><div style="margin-top:12px">${i.type==="Found"?`<button class="primary" onclick="go('claim')">Claim This Item</button>`:`<button class="secondary" onclick="showToast('This is a lost-item post')">View Contact Options</button>`}</div>`,true,"Item Details","home");
+}
+function claimForm(){
+ const i=selectedItem;if(!i)return go("home");
+ shell(`<p style="font-size:12px">You are about to claim this item.</p><div class="item-card" style="margin-bottom:13px"><div class="thumb">${imgOrEmoji(i)}</div><div class="item-main"><b>${esc(i.name)}</b><p>${esc(i.postedBy)}</p></div></div>
+ <div class="field"><label>Reason for Claim</label><textarea id="claimReason" placeholder="Explain why this item is yours..."></textarea></div>
+ <div class="field"><label>Contact Number</label><input id="claimContact" placeholder="Enter your contact number" value="${esc(user.phone)}"></div>
+ <button class="primary" onclick="submitClaim()">Submit Claim</button>`,true,"Claim Item","detail");
+}
+function submitClaim(){if(!document.getElementById("claimReason").value.trim()){showToast("Please add a reason");return}claims.unshift({itemId:selectedItem.id,status:"Pending",reason:document.getElementById("claimReason").value,contact:document.getElementById("claimContact").value,date:new Date().toLocaleDateString("en-IN")});save();showToast("Claim submitted");setTimeout(()=>go("claims"),400)}
+function claimsPage(){
+ const rows=claims.map(c=>{const i=items.find(x=>x.id===c.itemId);return i?`<div class="item-card"><div class="thumb">${imgOrEmoji(i)}</div><div class="item-main"><b>${esc(i.name)}</b><p>Claimed on ${esc(c.date)}<br>Status: ${esc(c.status)}</p></div>${badge(c.status)}</div>`:""}).join("");
+ shell(`<div style="display:flex;gap:6px;margin-bottom:12px"><span class="badge accepted">All</span><span class="badge pending">Pending</span><span class="badge accepted">Accepted</span><span class="badge rejected">Rejected</span></div><div class="items">${rows||`<div class="empty"><div>♧</div>No claims yet</div>`}</div>`,true,"My Claims");
+}
+function postsPage(){
+ const mine=items.filter(i=>i.postedBy===user.name||i.postedBy==="Suraj");const rows=mine.map(itemCard).join("");
+ shell(`<div style="display:flex;gap:6px;margin-bottom:12px"><span class="badge accepted">All</span><span class="badge">Lost</span><span class="badge found">Found</span></div><div class="items">${rows||`<div class="empty"><div>▣</div>No posts yet</div>`}</div>`,true,"My Posts");
+}
+function notifications(){
+ shell(`<div class="notice"><div class="notice-icon">♧</div><div><p>Your claim for <b>Black Wallet</b> is pending review.</p><small>10 May 2025, 03:10 PM</small></div></div>
+ <div class="notice"><div class="notice-icon">✓</div><div><p>Your claim for <b>ID Card</b> has been accepted.</p><small>8 May 2025, 11:20 AM</small></div></div>
+ <div class="notice"><div class="notice-icon">ⓘ</div><div><p>New item found: <b>Red Keychain</b> near Parking.</p><small>7 May 2025, 09:45 AM</small></div></div>
+ <div class="notice"><div class="notice-icon">▢</div><div><p>Your post has a new comment.</p><small>6 May 2025, 04:30 PM</small></div></div>`,true,"Notifications","profile");
+}
+function profile(){
+ shell(`<div class="profile-head"><div class="avatar">👤</div><h2>${esc(user.name)}</h2><p>${esc(user.course)}</p><p>${esc(user.email)}</p><p>${esc(user.phone)}</p></div>
+ <div class="menu-list"><button class="menu" onclick="go('posts')"><span class="mi">✉︎</span>My Posts<span class="arrow">›</span></button><button class="menu" onclick="go('claims')"><span class="mi">✓</span>My Claims<span class="arrow">›</span></button><button class="menu" onclick="go('notifications')"><span class="mi">⩍</span>Notifications<span class="arrow">›</span></button><button class="menu" onclick="editProfile()"><span class="mi">✎</span>Edit Profile<span class="arrow">›</span></button><button class="menu" onclick="showToast('Password change screen')"><span class="mi">ꄗ</span>Change Password<span class="arrow">›</span></button><button class="menu" onclick="go('login')"><span class="mi">⍈</span>Logout<span class="arrow">›</span></button></div>
+ <div style="margin-top:12px"><button class="secondary" onclick="go('admin')">Open Admin Dashboard (Demo)</button></div>`,true,"Profile");
+}
+function editProfile(){const n=prompt("Full name",user.name);if(n){user.name=n;save();go("profile")}}
+function admin(){
+ const found=items.filter(i=>i.type==="Found").length,lost=items.filter(i=>i.type==="Lost").length;
+ shell(`<div class="admin-stats"><div class="stat"><b>${items.length+123}</b><span>Total Items</span></div><div class="stat"><b>${lost+60}</b><span>Lost Items</span></div><div class="stat"><b>${found+63}</b><span>Found Items</span></div><div class="stat"><b>${claims.length+31}</b><span>Claims</span></div></div>
+ <div class="section-head"><h3>Recent Reports</h3><button class="link tiny">View All</button></div><div class="items">${items.slice(0,4).map(itemCard).join("")}</div>
+ <div class="section-head"><h3>Admin Tools</h3></div><div class="menu-list"><button class="menu" onclick="showToast('Item moderation opened')"><span class="mi">✓</span>Review Reports<span class="arrow">›</span></button><button class="menu" onclick="showToast('User management opened')"><span class="mi">♙</span>Manage Users<span class="arrow">›</span></button><button class="menu" onclick="showToast('Claim approvals opened')"><span class="mi">⌕</span>Review Claims<span class="arrow">›</span></button></div>`,false,"Admin Dashboard","profile");
+}
+function openCreate(){
+ app.innerHTML=`<div class="modal"><div class="modal-box"><h3>Create a Post</h3><div class="modal-actions"><button class="primary" onclick="go('lost')">🔒 Report Lost Item</button><button class="secondary" onclick="go('found')">🔓 Report Found Item</button><button class="secondary" onclick="go('home')">Cancel</button></div></div></div>`;
+}
+function go(page){current=page;render();window.scrollTo(0,0)}
+render();
+</script>
+</body>
+</html>
