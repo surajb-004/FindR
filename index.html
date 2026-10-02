@@ -134,6 +134,16 @@ textarea{min-height:86px;resize:vertical}
 <div class="app-shell"><div class="phone" id="app"></div></div>
 
 <script>
+  history.pushState(null, null, location.href);
+
+window.onpopstate = function () {
+    if (current !== "home") {
+        go("home");
+        history.pushState(null, null, location.href);
+    } else {
+        history.back();
+    }
+};
 const initialItems=[
  {id:1,name:"Black Wallet",type:"Found",category:"Accessories",location:"Near Library",date:"10 May 2025, 02:30 PM",description:"A black leather wallet found near the central library. Contains some cards and cash.",postedBy:"Rohit (BCA 2nd Year)",emoji:"👛",status:"Found"},
  {id:2,name:"ID Card",type:"Lost",category:"Documents",location:"Block C",date:"8 May 2025",description:"Student ID card lost in Block C.",postedBy:"Suraj",emoji:"🪪",status:"Lost"},
