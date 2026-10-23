@@ -361,5 +361,28 @@ function openCreate(){
 function go(page){current=page;render();window.scrollTo(0,0)}
 render();
 </script>
+  <script type="module">
+  // Import the functions you need from the SDKs you need
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/13.1.0/firebase-app.js";
+  import { getAnalytics } from "https://www.gstatic.com/firebasejs/13.1.0/firebase-analytics.js";
+  // TODO: Add SDKs for Firebase products that you want to use
+  // https://firebase.google.com/docs/web/setup#available-libraries
+
+  // Your web app's Firebase configuration
+  // For Firebase JS SDK v7.20.0 and later, measurementId is optional
+  const firebaseConfig = {
+    apiKey: "AIzaSyD9qL44P_1RtEPBz4D0uUBMYT-IWM2ubdQ",
+    authDomain: "findr-suraj004.firebaseapp.com",
+    projectId: "findr-suraj004",
+    storageBucket: "findr-suraj004.firebasestorage.app",
+    messagingSenderId: "68284615962",
+    appId: "1:68284615962:web:1e47e7222af65f8b3230a3",
+    measurementId: "G-RWZMBQK04Z"
+  };
+
+  // Initialize Firebase
+  const app = initializeApp(firebaseConfig);
+  const analytics = getAnalytics(app);
+  </script>
 </body>
 </html>
