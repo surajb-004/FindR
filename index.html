@@ -275,58 +275,17 @@ function home(){
 function itemCard(item){
  return `<button class="item-card" style="text-align:left;width:100%" onclick="openItem(${item.id})"><div class="thumb">${imgOrEmoji(item)}</div><div class="item-main"><b>${esc(item.name)}</b><p>${esc(item.type==="Found"?"Found":"Lost")} ${esc(item.location)} • ${esc(item.date)}</p></div>${badge(item.status)}</button>`;
 }
-async function submitReport(type) {
-    const name = document.getElementById("fName").value.trim();
-
-    if (!name) {
-        showToast("Please enter an item name");
-        return;
-    }
-
-    const report = {
-        name: name,
-        type: type,
-        category: document.getElementById("fCategory").value,
-        location: document.getElementById("fLocation").value || "Campus",
-        date: new Date(
-            document.getElementById("fDate").value || Date.now()
-        ).toLocaleString("en-IN"),
-        description:
-            document.getElementById("fDesc").value ||
-            "No description provided.",
-        postedBy: user.name,
-        emoji: type === "Lost" ? "📦" : "🔎",
-        status: type
-    };
-
-    try {
-        if (!window.saveFindRReport) {
-            throw new Error("Firebase is not initialized.");
-        }
-
-        // Save the report to Cloud Firestore
-        const firestoreId = await window.saveFindRReport(report);
-
-        // Keep the existing interface working
-        items.unshift({
-            ...report,
-            id: Date.now(),
-            firestoreId: firestoreId
-        });
-
-        // Preserve the current browser storage behavior
-        save();
-
-        showToast(`${type} item saved successfully`);
-
-        setTimeout(() => go("posts"), 450);
-
-    } catch (error) {
-        console.error("FindR report submission failed:", error);
-
-        showToast("Unable to save report. Check Firebase settings.");
-    }
-}function pickImage(id){document.getElementById(id).click()}
+function reportForm(type){
+ const isLost=type==="Lost";
+ shell(`<div class="form-card"><div class="upload" onclick="pickImage('photo-${type}')"><div><div class="upload-icon">￼</div>Add Item Photo</div><input id="photo-${type}" type="file" accept="image/*" hidden onchange="previewPhoto(event,'preview-${type}')"></div><img id="preview-${type}" style="display:none;width:100%;height:130px;object-fit:contain;border-radius:9px;margin:-2px 0 12px"></div>
+ <div class="field"><label>Item Name</label><input id="fName" placeholder="e.g. Black Wallet"></div>
+ <div class="field"><label>Category</label><select id="fCategory"><option>Accessories</option><option>Documents</option><option>Books</option><option>Electronics</option><option>Personal</option><option>Other</option></select></div>
+ <div class="field"><label>Description</label><textarea id="fDesc" placeholder="Write details about the item..."></textarea></div>
+ <div class="field"><label>${isLost?"Lost":"Found"} Location</label><input id="fLocation" placeholder="e.g. Library, C Block"></div>
+ <div class="field"><label>${isLost?"Lost":"Found"} Date &amp; Time</label><input id="fDate" type="datetime-local"></div>
+ <div class="form-actions"><button class="primary" onclick="submitReport('${type}')">Submit</button></div>`,true,`Report ${type} Item`,"home");
+}
+function pickImage(id){document.getElementById(id).click()}
 function previewPhoto(e,id){const file=e.target.files[0];if(!file)return;const r=new FileReader();r.onload=()=>{const im=document.getElementById(id);im.src=r.result;im.style.display="block";im.dataset.value=r.result};r.readAsDataURL(file)}
 function submitReport(type){
  const name=document.getElementById("fName").value.trim();if(!name){showToast("Please enter an item name");return}
@@ -402,28 +361,5 @@ function openCreate(){
 function go(page){current=page;render();window.scrollTo(0,0)}
 render();
 </script>
-  <script type="module">
-  // Import the functions you need from the SDKs you need
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/13.1.0/firebase-app.js";
-  import { getAnalytics } from "https://www.gstatic.com/firebasejs/13.1.0/firebase-analytics.js";
-  // TODO: Add SDKs for Firebase products that you want to use
-  // https://firebase.google.com/docs/web/setup#available-libraries
-
-  // Your web app's Firebase configuration
-  // For Firebase JS SDK v7.20.0 and later, measurementId is optional
-  const firebaseConfig = {
-    apiKey: "AIzaSyD9qL44P_1RtEPBz4D0uUBMYT-IWM2ubdQ",
-    authDomain: "findr-suraj004.firebaseapp.com",
-    projectId: "findr-suraj004",
-    storageBucket: "findr-suraj004.firebasestorage.app",
-    messagingSenderId: "68284615962",
-    appId: "1:68284615962:web:1e47e7222af65f8b3230a3",
-    measurementId: "G-RWZMBQK04Z"
-  };
-
-  // Initialize Firebase
-  const app = initializeApp(firebaseConfig);
-  const analytics = getAnalytics(app);
-  </script>
 </body>
 </html>
